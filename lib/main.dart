@@ -14,7 +14,6 @@ import 'grid_view_test.dart';
 import 'inherited_widget_test.dart';
 import 'isolate_test.dart';
 import 'list_view_test.dart';
-import 'lk_test.dart';
 import 'log_test.dart';
 import 'nested_scroll_view_test.dart';
 import 'page_route_test.dart';
@@ -94,7 +93,6 @@ void main() {
 }
 
 const _routes = {
-  'LeetCode': LKTest(),
   'Log': LogTest(),
   'Performance': PerformanceTest(),
   'Error': ErrorTestPage(),
