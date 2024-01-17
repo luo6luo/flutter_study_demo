@@ -12,7 +12,67 @@ class _AnimationTestState extends State<AnimationTest> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Animation Test')),
-      body: const TweenAnimationBuilderExampleApp(),
+      body: const HeroAnimationRouteA(),
+    );
+  }
+}
+
+/// 自定义路由动画
+class CustomPageRouteBuilderTest extends StatefulWidget {
+  const CustomPageRouteBuilderTest({super.key});
+
+  @override
+  State<CustomPageRouteBuilderTest> createState() =>
+      _CustomPageRouteBuilderTestState();
+}
+
+class _CustomPageRouteBuilderTestState
+    extends State<CustomPageRouteBuilderTest> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            PageRouteBuilder<void>(
+              pageBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+              ) {
+                return Scaffold(
+                  appBar: AppBar(title: const Text('Hello')),
+                  body: const Center(
+                    child: Text('Hello World'),
+                  ),
+                );
+              },
+              transitionsBuilder: (
+                BuildContext context,
+                Animation<double> animation,
+                Animation<double> secondaryAnimation,
+                Widget child,
+              ) {
+                return SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(1.0, 0.0),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: SlideTransition(
+                    position: Tween<Offset>(
+                      begin: Offset.zero,
+                      end: const Offset(1.0, 0.0),
+                    ).animate(secondaryAnimation),
+                    child: child,
+                  ),
+                );
+              },
+            ),
+          );
+        },
+        child: const Text('自定义路由动画'),
+      ),
     );
   }
 }
@@ -509,6 +569,101 @@ class _TweenAnimationBuilderExampleState
         );
       },
       child: const Icon(Icons.aspect_ratio),
+    );
+  }
+}
+
+class HeroAnimationRouteA extends StatelessWidget {
+  const HeroAnimationRouteA({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.topCenter,
+      child: Column(
+        children: <Widget>[
+          InkWell(
+            child: Hero(
+              tag: "avatar", //唯一标记，前后两个路由页Hero的tag必须相同
+              child: ClipOval(
+                child: Image.asset("assets/images/logo.png", width: 50.0),
+              ),
+              flightShuttleBuilder: (
+                BuildContext flightContext,
+                Animation<double> animation,
+                HeroFlightDirection flightDirection,
+                BuildContext fromHeroContext,
+                BuildContext toHeroContext,
+              ) {
+                return const FlutterLogo(); // 构建自定义的飞行中小部件
+              },
+              placeholderBuilder:
+                  (BuildContext context, Size heroSize, Widget child) {
+                return const SizedBox(
+                  width: 50.0,
+                  height: 50.0,
+                  child: CircularProgressIndicator(),
+                );
+              },
+            ),
+            onTap: () {
+              //打开B路由
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  pageBuilder: (
+                    BuildContext context,
+                    animation,
+                    secondaryAnimation,
+                  ) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: Scaffold(
+                        appBar: AppBar(title: const Text("原图")),
+                        body: const HeroAnimationRouteB(),
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+          const Padding(
+            padding: EdgeInsets.only(top: 8.0),
+            child: Text("点击头像"),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class HeroAnimationRouteB extends StatelessWidget {
+  const HeroAnimationRouteB({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Hero(
+          tag: "avatar", //唯一标记，前后两个路由页Hero的tag必须相同
+          child: Image.asset("assets/images/logo.png"),
+          flightShuttleBuilder: (
+            BuildContext flightContext,
+            Animation<double> animation,
+            HeroFlightDirection flightDirection,
+            BuildContext fromHeroContext,
+            BuildContext toHeroContext,
+          ) {
+            return const FlutterLogo(); // 构建自定义的飞行中小部件
+          },
+          placeholderBuilder:
+              (BuildContext context, Size heroSize, Widget child) {
+            return SizedBox(
+              width: heroSize.width,
+              height: heroSize.height,
+              child: const CircularProgressIndicator(),
+            );
+          }),
     );
   }
 }
