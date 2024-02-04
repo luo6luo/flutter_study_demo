@@ -79,7 +79,7 @@ mixin _ImplementationMixin2<T extends StatefulWidget> on State<T> {
   }
 }
 
-class _MixinClass {
+mixin class _MixinClass {
   void printMixinClass() {
     debugPrint('print - MixinClass');
   }

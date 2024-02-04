@@ -12,7 +12,7 @@ class _AnimationTestState extends State<AnimationTest> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Animation Test')),
-      body: const HeroAnimationRouteA(),
+      body: const TweenAnimationValueExample(),
     );
   }
 }
@@ -77,6 +77,126 @@ class _CustomPageRouteBuilderTestState
   }
 }
 
+class AnimatedSwitcher0Example extends StatefulWidget {
+  const AnimatedSwitcher0Example({super.key});
+
+  @override
+  State<AnimatedSwitcher0Example> createState() =>
+      _AnimatedSwitcher0ExampleState();
+}
+
+class _AnimatedSwitcher0ExampleState extends State<AnimatedSwitcher0Example> {
+  int _count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              return ScaleTransition(scale: animation, child: child);
+            },
+            child: Text(
+              '$_count',
+              // This key causes the AnimatedSwitcher to interpret this as a "new"
+              // child each time the count changes, so that it will begin its animation
+              // when the count changes.
+              key: ValueKey<int>(_count),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ),
+          ElevatedButton(
+            child: const Text('Increment'),
+            onPressed: () {
+              setState(() {
+                _count += 1;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 模拟路由切换
+class AnimatedSwitcher1Example extends StatefulWidget {
+  const AnimatedSwitcher1Example({super.key});
+
+  @override
+  State<AnimatedSwitcher1Example> createState() =>
+      _AnimatedSwitcher1ExampleState();
+}
+
+class _AnimatedSwitcher1ExampleState extends State<AnimatedSwitcher1Example> {
+  int _count = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (Widget child, Animation<double> animation) {
+              final positionTween =
+                  Tween<Offset>(begin: const Offset(1, 0), end: Offset.zero);
+              return MyScaleTransition(
+                position: positionTween.animate(animation),
+                child: child,
+              );
+            },
+            child: Text(
+              '$_count',
+              // This key causes the AnimatedSwitcher to interpret this as a "new"
+              // child each time the count changes, so that it will begin its animation
+              // when the count changes.
+              key: ValueKey<int>(_count),
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+          ),
+          ElevatedButton(
+            child: const Text('Increment'),
+            onPressed: () {
+              setState(() {
+                _count += 1;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MyScaleTransition extends AnimatedWidget {
+  const MyScaleTransition({
+    super.key,
+    required Animation<Offset> position,
+    required this.child,
+  }) : super(listenable: position);
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final position = listenable as Animation<Offset>;
+    Offset value = position.value;
+    if (position.status == AnimationStatus.reverse) {
+      value = Offset(-value.dx, value.dy);
+    }
+    return FractionalTranslation(
+      translation: value,
+      child: child,
+    );
+  }
+}
+
 class RelativePositionedTransitionExample extends StatefulWidget {
   const RelativePositionedTransitionExample({Key? key}) : super(key: key);
 
@@ -121,10 +241,13 @@ class _RelativePositionedTransitionExampleState
                   biggest.width / 2,
                   biggest.height,
                 ),
-              ).animate(CurvedAnimation(
-                parent: _controller,
-                curve: Curves.linear,
-              )),
+              ).animate(
+                CurvedAnimation(
+                  parent: _controller,
+                  // curve: Curves.linear,
+                  curve: const Interval(0, 1.0, curve: Curves.linear),
+                ),
+              ),
               child: const Padding(
                 padding: EdgeInsets.all(8),
                 child: FlutterLogo(),
@@ -285,15 +408,26 @@ class _AlignTransitionExampleState extends State<AlignTransitionExample>
     duration: const Duration(seconds: 2),
     vsync: this,
   )..repeat(reverse: true);
-  late final Animation<AlignmentGeometry> _animation = Tween<AlignmentGeometry>(
+  final tween = Tween<AlignmentGeometry>(
     begin: Alignment.bottomLeft,
     end: Alignment.topRight,
-  ).animate(
+  );
+  late final Animation<AlignmentGeometry> _animation = tween.animate(
     CurvedAnimation(
       parent: _controller,
-      curve: Curves.decelerate,
+      curve: Curves.easeIn,
     ),
   );
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(() {
+      final value = _animation.value;
+      final evaluated = tween.evaluate(_controller);
+      print('value: $value; tween.evaluate: $evaluated');
+    });
+  }
 
   @override
   void dispose() {
@@ -528,17 +662,6 @@ class _AnimatedCrossFadeExampleState extends State<AnimatedCrossFadeExample> {
   }
 }
 
-class TweenAnimationBuilderExampleApp extends StatelessWidget {
-  const TweenAnimationBuilderExampleApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: TweenAnimationBuilderExample(),
-    );
-  }
-}
-
 class TweenAnimationBuilderExample extends StatefulWidget {
   const TweenAnimationBuilderExample({Key? key}) : super(key: key);
 
@@ -569,6 +692,56 @@ class _TweenAnimationBuilderExampleState
         );
       },
       child: const Icon(Icons.aspect_ratio),
+    );
+  }
+}
+
+/// 测试 [Anination] 取值 [value] 和 [evaluate] 函数间关系
+class TweenAnimationValueExample extends StatefulWidget {
+  const TweenAnimationValueExample({super.key});
+
+  @override
+  State<TweenAnimationValueExample> createState() =>
+      _TweenAnimationValueExampleState();
+}
+
+class _TweenAnimationValueExampleState extends State<TweenAnimationValueExample>
+    with SingleTickerProviderStateMixin {
+  final tween = Tween<double>(begin: 0, end: 100);
+  late Animation<double> animation;
+  late AnimationController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+    animation = tween.animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: Curves.linear,
+      ),
+    );
+
+    animation.addListener(() {
+      print(
+          'value: ${animation.value}; evaluate: ${tween.evaluate(controller)}');
+    });
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: animation,
+      child: const FlutterLogo(),
     );
   }
 }

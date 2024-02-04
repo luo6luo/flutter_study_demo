@@ -11,13 +11,16 @@ import 'error_test_page.dart';
 import 'event_test.dart';
 import 'feature_test.dart';
 import 'grid_view_test.dart';
+import 'http_test.dart';
 import 'inherited_widget_test.dart';
 import 'isolate_test.dart';
 import 'list_view_test.dart';
 import 'log_test.dart';
+import 'mixin_test.dart';
 import 'nested_scroll_view_test.dart';
 import 'page_route_test.dart';
 import 'page_view_test.dart';
+import 'paint_test.dart';
 import 'performance_test.dart';
 import 'tab_bar_view_test.dart';
 import 'text_filed_test.dart';
@@ -114,6 +117,9 @@ const _routes = {
   'Theme': ThemeTest(),
   'Dialog': DialogTest(),
   'Event': EventTest(),
+  'CustomPaint': PaintTest(),
+  'Mixin': MixinTest(),
+  'Http': HttpTest(),
 };
 
 class MyApp extends StatelessWidget {
